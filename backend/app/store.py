@@ -14,6 +14,9 @@ class Store:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
+        # 运行期领域表：逐块情感批次数据集与文本补录清单，无示例数据。
+        self._tables.setdefault("sentiment_batches", [])
+        self._tables.setdefault("text_supplement", [])
 
     def module_names(self) -> list[str]:
         return sorted(self._tables)

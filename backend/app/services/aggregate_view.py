@@ -35,7 +35,11 @@ class AggregateViewService(BaseModuleService):
         }
 
     def aggregate_sentiment_trend(self) -> dict[str, Any]:
-        """消费情感标注的分布数据。"""
+        """消费情感标注的分布数据。
+
+        分布必须标明实际覆盖的页面与参与计数的块；待补录缺块单列，
+        不混入任何情感类别（尤其不能计作中性），与补录清单覆盖范围对得上。
+        """
         from app.services.sentiment_tag import SentimentTagService
         sts = SentimentTagService()
         summary = sts.compute_sentiment_summary()
@@ -45,6 +49,19 @@ class AggregateViewService(BaseModuleService):
             "data_source": "sentiment_tag",
             "sentiment_distribution": summary["sentiment_distribution"],
             "total_records": summary["total_records"],
+            "counted_block_count": summary["counted_block_count"],
+            "covered_pages": summary["covered_pages"],
+            "covered_page_count": summary["covered_page_count"],
+            "pending_supplement_count": summary["pending_supplement_count"],
+            "pending_supplement_blocks": summary["pending_supplement_blocks"],
+            "negative_review_blocks": [
+                {
+                    "block_id": item["block_id"],
+                    "source_page": item.get("source_page"),
+                    "批次ID": item.get("批次ID"),
+                }
+                for item in sts.negative_blocks_for_review()
+            ],
         }
 
     def aggregate_quality_metrics(self) -> dict[str, Any]:
